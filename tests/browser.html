@@ -1,0 +1,41 @@
+<!doctype html><meta charset="utf-8"><title>Elevator audio browser test</title>
+<button id="unlock">Enable test audio</button><pre id="result">RUNNING</pre>
+<script type="module">
+import { ElevatorAudio, MUSIC_STYLES } from '../web/audio.js';
+import { RunSession } from '../web/session.js';
+const result = document.getElementById('result');
+try {
+    const prefs = {Enabled:true,Volume:25,Ding:true};
+    const audio = new ElevatorAudio((key, fallback) => prefs[key] ?? fallback);
+    document.getElementById('unlock').onclick = () => audio.unlock();
+    audio.unlock();
+    await audio.context.resume();
+    const session = new RunSession(audio);
+    await session.submit(async () => ({prompt_id:'browser-test'}));
+    await new Promise(r => setTimeout(r,250));
+    if (!audio.source?.loop || audio.context.state !== 'running') throw Error('Loop did not start');
+    if (audio.buffer.duration < 18) throw Error('Loop too short');
+    for (const style of MUSIC_STYLES.slice(1)) {
+        const oldSource = audio.source;
+        audio.changeStyle(style);
+        await new Promise(r => setTimeout(r,250));
+        if (!audio.source?.loop || audio.source === oldSource) throw Error('Live style switch failed: '+style);
+    }
+    prefs.Volume = 10; audio.updateVolume();
+    session.finish('browser-test',true);
+    if (audio.source !== null || audio.chimes.size !== 3) throw Error('Music did not stop and ding');
+    await new Promise(r => setTimeout(r,2100));
+    if (audio.chimes.size) throw Error('Bell nodes not cleaned up');
+    await session.submit(async () => ({prompt_id:'cancel-test'}));
+    session.finish('cancel-test',false);
+    if (audio.source || audio.chimes.size) throw Error('Cancellation failed');
+    prefs.Enabled=false;
+    audio.start();
+    if (audio.source) throw Error('Mute failed');
+    audio.mute();
+    await audio.context.close();
+    audio.changeStyle(MUSIC_STYLES[0]);
+    if (audio.source) throw Error('Idle style switch started music');
+    result.textContent='PASS: all four styles, live switching, idle switching, volume, successful completion bell, cleanup, cancellation, mute';
+} catch (error) { result.textContent='FAIL: '+error.stack; }
+</script>

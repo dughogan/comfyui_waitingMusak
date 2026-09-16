@@ -1,0 +1,8 @@
+backups/
+__pycache__/
+*.pyc
+node_modules/
+tests/*-result.html
+*.log
+.DS_Store
+Thumbs.db
