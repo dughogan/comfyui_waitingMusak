@@ -3,6 +3,7 @@
 <script type="module">
 import { ElevatorAudio, MUSIC_STYLES } from '../web/audio.js';
 import { RunSession } from '../web/session.js';
+import { MusicPreview } from '../web/preview.js';
 const result = document.getElementById('result');
 try {
     const prefs = {Enabled:true,Volume:25,Ding:true};
@@ -33,9 +34,21 @@ try {
     audio.start();
     if (audio.source) throw Error('Mute failed');
     audio.mute();
+    const preview = new MusicPreview((key, fallback) => prefs[key] ?? fallback, audio, session, 500);
+    const table = document.createElement('table');
+    document.body.append(table);
+    table.append(preview.createRow('Preview selected music'));
+    preview.audio.context = audio.context;
+    preview.audio.master = audio.master;
+    preview.start();
+    await new Promise(r => setTimeout(r,100));
+    if (!preview.audio.source || !table.textContent.includes('Stop preview')) throw Error('Preview did not play while automatic music was disabled');
+    preview.changeStyle('Yacht Rock');
+    await new Promise(r => setTimeout(r,700));
+    if (preview.active || preview.audio.source || !table.textContent.includes('Preview selected music')) throw Error('Preview did not automatically stop');
     await audio.context.close();
     audio.changeStyle(MUSIC_STYLES[0]);
     if (audio.source) throw Error('Idle style switch started music');
-    result.textContent='PASS: all four styles, live switching, idle switching, volume, successful completion bell, cleanup, cancellation, mute';
+    result.textContent='PASS: all four styles, switching, volume, completion, cancellation, mute, preview button, preview with auto-music disabled, preview timeout';
 } catch (error) { result.textContent='FAIL: '+error.stack; }
 </script>

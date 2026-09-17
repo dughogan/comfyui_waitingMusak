@@ -2,6 +2,7 @@ import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
 import { ElevatorAudio, MUSIC_STYLES } from "./audio.js";
 import { RunSession } from "./session.js";
+import { MusicPreview } from "./preview.js";
 
 app.registerExtension({
     name: "Doug.ElevatorMusic",
@@ -10,6 +11,7 @@ app.registerExtension({
         const get = (name, fallback) => app.ui.settings.getSettingValue(`Doug.ElevatorMusic.${name}`, fallback);
         const audio = new ElevatorAudio(get);
         const session = new RunSession(audio);
+        const preview = new MusicPreview(get, audio, session);
         let idleTimer;
         api.__dougElevatorMusic = true;
         const setting = (id, name, type, defaultValue, extra = {}) => app.ui.settings.addSetting({
@@ -17,16 +19,17 @@ app.registerExtension({
             category: ["Elevator Music", "Playback", name], ...extra,
         });
         setting("Enabled", "Play elevator music while running", "boolean", true, {
-            onChange: value => { if (!value) audio.mute(); else if (session.active) audio.start(); },
+            onChange: value => { if (!value) audio.mute(); else if (session.active && !preview.active) audio.start(); },
         });
         setting("Volume", "Elevator music volume", "slider", 25, {
-            attrs: { min: 0, max: 100, step: 1 }, onChange: () => audio.updateVolume(),
+            attrs: { min: 0, max: 100, step: 1 }, onChange: () => { audio.updateVolume(); preview.audio.updateVolume(); },
         });
         setting("Ding", "Ding when the run completes", "boolean", true);
         setting("Style", "Elevator music style", "combo", MUSIC_STYLES[0], {
             options: MUSIC_STYLES,
-            onChange: value => audio.changeStyle(value),
+            onChange: value => { audio.changeStyle(value); preview.changeStyle(value); },
         });
+        setting("Preview", "Preview selected music (12 seconds)", name => preview.createRow(name), null);
 
         // Unlock Web Audio synchronously in a real user gesture, before graph serialization.
         const unlock = () => { if (get("Enabled", true) && audio.context?.state !== "running") audio.unlock(); };
@@ -36,11 +39,13 @@ app.registerExtension({
         // Preserve arguments, receiver, results and exceptions of other extensions.
         const originalAppQueue = app.queuePrompt;
         app.queuePrompt = function (...args) {
+            preview.stop();
             clearTimeout(idleTimer);
             return session.batch(() => originalAppQueue.apply(this, args));
         };
         const originalApiQueue = api.queuePrompt;
         api.queuePrompt = function (...args) {
+            preview.stop();
             clearTimeout(idleTimer);
             return session.submit(() => originalApiQueue.apply(this, args));
         };
@@ -60,6 +65,6 @@ app.registerExtension({
                 }, 1200);
             } else clearTimeout(idleTimer);
         });
-        window.addEventListener("pagehide", () => { clearTimeout(idleTimer); session.abort(); audio.mute(); });
+        window.addEventListener("pagehide", () => { clearTimeout(idleTimer); preview.stop(false); session.abort(); audio.mute(); });
     },
 });

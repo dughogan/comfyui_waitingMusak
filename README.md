@@ -39,6 +39,7 @@ Open **Settings → Elevator Music**, or search settings for **Elevator**.
 - **Elevator music style** — choose a style; switches during playback with a short fade.
 - **Elevator music volume** — 0–100, default 25.
 - **Ding when the run completes** — toggle the completion bell.
+- **Preview selected music (12 seconds)** — click **Preview selected music** to audition your choice without running a workflow; click **Stop preview** to end early. Changing styles during a preview auditions the new selection. Works even with automatic run music disabled. Preview temporarily pauses any run soundtrack and restores it afterward if the run is still active. Starting a workflow stops the preview.
 
 ComfyUI saves your preferences. No workflow edits are needed.
 
