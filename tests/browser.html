@@ -43,12 +43,15 @@ try {
     preview.start();
     await new Promise(r => setTimeout(r,100));
     if (!preview.audio.source || !table.textContent.includes('Stop preview')) throw Error('Preview did not play while automatic music was disabled');
-    preview.changeStyle('Yacht Rock');
+    preview.changeStyle('8-bit Scarecrow Shuffle');
+    await new Promise(r => setTimeout(r,100));
+    if (!preview.audio.source) throw Error('Scarecrow preview failed');
+    preview.changeStyle('Beachside Bossa');
     await new Promise(r => setTimeout(r,700));
     if (preview.active || preview.audio.source || !table.textContent.includes('Preview selected music')) throw Error('Preview did not automatically stop');
     await audio.context.close();
     audio.changeStyle(MUSIC_STYLES[0]);
     if (audio.source) throw Error('Idle style switch started music');
-    result.textContent='PASS: all four styles, switching, volume, completion, cancellation, mute, preview button, preview with auto-music disabled, preview timeout';
+    result.textContent='PASS: all six styles, switching, volume, completion, cancellation, mute, preview button, preview with auto-music disabled, preview timeout';
 } catch (error) { result.textContent='FAIL: '+error.stack; }
 </script>

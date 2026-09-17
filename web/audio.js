@@ -1,12 +1,14 @@
 // Original procedural arrangements; no network, audio files, or dependencies.
 const TAU = Math.PI * 2;
 const hz = midi => 440 * 2 ** ((midi - 69) / 12);
-export const MUSIC_STYLES = ["Classic Lounge", "Bossa Nova", "8-bit Adventure (Zelda-inspired)", "Yacht Rock"];
+export const MUSIC_STYLES = ["Classic Lounge", "Bossa Nova", "8-bit Adventure (Zelda-inspired)", "Yacht Rock", "8-bit Scarecrow Shuffle", "Beachside Bossa"];
 export function compose(sampleRate = 22050, style = MUSIC_STYLES[0]) {
     const adventure = style === MUSIC_STYLES[2];
     const bossa = style === MUSIC_STYLES[1];
     const yacht = style === MUSIC_STYLES[3];
-    const beat = 60 / (adventure ? 116 : bossa ? 122 : yacht ? 92 : 104);
+    const scarecrow = style === MUSIC_STYLES[4];
+    const beach = style === MUSIC_STYLES[5];
+    const beat = 60 / (scarecrow ? 110 : beach ? 96 : adventure ? 116 : bossa ? 122 : yacht ? 92 : 104);
     const length = 32 * beat;
     const data = new Float32Array(Math.round(length * sampleRate));
     function note(midi, start, duration, level, kind = "keys") {
@@ -17,19 +19,22 @@ export function compose(sampleRate = 22050, style = MUSIC_STYLES[0]) {
             const t = i / sampleRate;
             const attack = Math.min(1, t / 0.012);
             const release = Math.min(1, (duration - t) / 0.08);
-            const decay = Math.exp(-t * (adventure ? 1.2 : bossa ? 4 : yacht && kind !== "bass" ? 1.4 : kind === "bass" ? 3 : 2.3));
+            const decay = Math.exp(-t * (scarecrow ? 2 : beach ? (kind === "lead" ? 1 : 3.5) : adventure ? 1.2 : bossa ? 4 : yacht && kind !== "bass" ? 1.4 : kind === "bass" ? 3 : 2.3));
             let wave = kind === "bass"
                 ? Math.sin(TAU * frequency * t) + 0.15 * Math.sin(TAU * frequency * 2 * t)
                 : Math.sin(TAU * frequency * t + 0.6 * Math.exp(-4*t) * Math.sin(TAU * frequency * 2*t))
                   + 0.12 * Math.sin(TAU * frequency * 3*t);
-            if (adventure) {
+            if (adventure || scarecrow) {
                 // Limited harmonics keep the chip timbre bright without aliasing.
                 wave = 0;
                 for (let h = 1; h <= 9 && frequency*h < sampleRate*0.45; h += 2) {
                     const amplitude = kind === "bass" ? ((h % 4 === 1 ? 1 : -1) / (h*h)) : 0.7/h;
                     wave += amplitude * Math.sin(TAU * frequency * h * t);
                 }
-            } else if (bossa && kind !== "bass") {
+            } else if (beach && kind === "lead") {
+                const phase = TAU*frequency*t + 0.018*Math.sin(TAU*4.6*t);
+                wave = Math.sin(phase) + 0.14*Math.sin(2*phase);
+            } else if ((bossa || beach) && kind !== "bass") {
                 wave = Math.sin(TAU*frequency*t) + 0.3*Math.exp(-6*t)*Math.sin(TAU*frequency*2*t);
             } else if (yacht && kind === "lead") {
                 const phase = TAU*frequency*t + 0.035*Math.sin(TAU*5*t);
@@ -40,6 +45,38 @@ export function compose(sampleRate = 22050, style = MUSIC_STYLES[0]) {
             }
             data[(offset + i) % data.length] += wave * attack * release * decay * level;
         }
+    }
+    if (scarecrow || beach) {
+        // Original compositions: distinct harmony, melody, rhythm and accompaniment.
+        const chords = scarecrow
+            ? [[60,64,67,69],[64,67,71,74],[65,69,72,74],[62,66,69,72],
+               [67,71,74,76],[64,67,69,72],[62,65,69,72],[59,62,65,69]]
+            : [[63,67,70,74],[60,63,67,70],[65,68,72,75],[62,65,68,72],
+               [67,70,74,77],[60,64,67,70],[65,68,72,75],[62,65,68,72]];
+        const roots = scarecrow ? [36,40,41,38,43,33,38,31] : [39,36,41,34,43,36,41,34];
+        const melody = scarecrow
+            ? [[79,76,81,79,72,74],[83,79,78,76,74,79],[81,77,74,77,84,81],[78,81,76,74,72,69],
+               [83,86,81,79,76,79],[81,76,72,74,79,76],[77,81,74,72,69,74],[71,77,74,69,71,74]]
+            : [[79,74,77,82],[75,79,74,72],[80,75,77,84],[77,74,72,70],
+               [81,77,79,86],[79,76,74,72],[80,84,79,77],[74,77,72,70]];
+        for (let bar = 0; bar < 8; bar++) {
+            const start = bar*4*beat;
+            for (const pulse of (scarecrow ? [0.67,1.67,2.67,3.67] : [0,1.5,2.75])) {
+                chords[bar].forEach((n,i) => note(n,start+pulse*beat+i*0.006,
+                    beat*(scarecrow ? 0.22 : 0.8),scarecrow ? 0.035 : 0.033));
+            }
+            for (let step=0; step<4; step++) {
+                if (beach && step%2) continue;
+                note(roots[bar]+(step%2 ? 7 : 0),start+step*beat,beat*0.6,0.13,"bass");
+            }
+            if (beach) note(roots[bar]+7,start+3.5*beat,beat*0.4,0.07,"bass");
+            const offsets = scarecrow ? [0,0.67,1,1.67,2.5,3.33]
+                : bar%2 ? [0.5,1.25,2.5,3.25] : [0.25,1.5,2.25,3.25];
+            melody[bar].forEach((n,i) => note(n,start+offsets[i]*beat,
+                beat*(scarecrow ? [0.45,0.22,0.45,0.4,0.55,0.45][i] : [0.85,0.55,0.65,0.65][i]),
+                scarecrow ? 0.115 : 0.09,"lead"));
+        }
+        return data;
     }
     const chords = adventure
         ? [[62,65,69,74],[58,62,65,70],[60,64,67,72],[57,61,64,69],

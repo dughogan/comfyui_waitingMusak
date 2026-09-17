@@ -15,7 +15,9 @@ No nodes to connect. No models to download. Just deeply unnecessary ambience.
 | **8-bit Adventure (Zelda-inspired)** | Bright chip lead, rippling arpeggios and triangle-like bass. Your render is in another dungeon. |
 | **Yacht Rock** | Mellow electric piano, a soft guitar-like lead and a relaxed bass groove. Inference, but on a boat. |
 
-All four are original synthesized instrumental loops, not recordings or arrangements of existing songs. The adventure option evokes retro fantasy-game music; this project is not affiliated with Nintendo.
+All six are original synthesized instrumental loops, not recordings or arrangements of existing songs. The adventure option evokes retro fantasy-game music; this project is not affiliated with Nintendo.
+
+The two newest selections are **8-bit Scarecrow Shuffle**, a jaunty original chiptune with swung phrases and bouncy musical-theater accompaniment, and **Beachside Bossa**, an original seaside melody with nylon-like chords, a soft flute-like lead and an unhurried bass pulse. Both work with the settings preview.
 
 ## Install
 
@@ -62,7 +64,7 @@ Requires Node.js only to run the automated tests:
 npm test
 ```
 
-Tests cover run lifecycle, batches, cached completions, errors, disconnects and waveform checks for all four styles. For actual Web Audio playback, serve the repository with a local HTTP server, open `tests/browser.html`, and click **Enable test audio**. The page checks live style switching, volume, completion, cleanup and mute.
+Tests cover run lifecycle, batches, cached completions, errors, disconnects and waveform checks for all six styles. For actual Web Audio playback, serve the repository with a local HTTP server, open `tests/browser.html`, and click **Enable test audio**. The page checks live style switching, volume, completion, cleanup and mute.
 
 The frontend registers through ComfyUI's extension API, wraps queue calls while preserving arguments/results/exceptions, and listens for execution success/error/interruption events. See [ComfyUI's extension examples](https://docs.comfy.org/custom-nodes/js/javascript_examples).
 
