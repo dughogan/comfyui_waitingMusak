@@ -1,4 +1,4 @@
-# ComfyUI_LiftMeUpButtercup
+# comfyui_waitingMusak
 
 ### Your GPU is working hard. You are on hold.
 
@@ -22,7 +22,7 @@ All four are original synthesized instrumental loops, not recordings or arrangem
 From your ComfyUI `custom_nodes` directory:
 
 ```sh
-git clone https://github.com/dughogan/ComfyUI_LiftMeUpButtercup.git
+git clone https://github.com/dughogan/comfyui_waitingMusak.git
 ```
 
 Restart ComfyUI, refresh the interface, and click **Run**. No `pip install` or other dependencies required.
