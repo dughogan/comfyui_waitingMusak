@@ -34,6 +34,15 @@ try {
     audio.start();
     if (audio.source) throw Error('Mute failed');
     audio.mute();
+    prefs.Enabled=true;
+    prefs.Music=false;
+    await session.submit(async () => ({prompt_id:'ding-only'}));
+    await new Promise(r => setTimeout(r,100));
+    if (audio.source || !audio.wanted) throw Error('Ding-only mode played music or lost run state');
+    session.finish('ding-only',true);
+    if (audio.chimes.size !== 3) throw Error('Ding-only completion did not ring');
+    audio.mute();
+    prefs.Enabled=false;
     const preview = new MusicPreview((key, fallback) => prefs[key] ?? fallback, audio, session, 500);
     const table = document.createElement('table');
     document.body.append(table);
@@ -52,6 +61,6 @@ try {
     await audio.context.close();
     audio.changeStyle(MUSIC_STYLES[0]);
     if (audio.source) throw Error('Idle style switch started music');
-    result.textContent='PASS: all six styles, switching, volume, completion, cancellation, mute, preview button, preview with auto-music disabled, preview timeout';
+    result.textContent='PASS: all six styles, switching, volume, completion, cancellation, mute, ding-only run, preview with music disabled, preview timeout';
 } catch (error) { result.textContent='FAIL: '+error.stack; }
 </script>

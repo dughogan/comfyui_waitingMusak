@@ -3,7 +3,7 @@ import { ElevatorAudio } from "./audio.js";
 export class MusicPreview {
     constructor(get, runAudio, session, duration = 12000) {
         // Preview remains available when automatic run music is disabled.
-        this.audio = new ElevatorAudio((key, fallback) => key === "Enabled" ? true : get(key, fallback));
+        this.audio = new ElevatorAudio((key, fallback) => key === "Enabled" || key === "Music" ? true : get(key, fallback));
         this.runAudio = runAudio;
         this.session = session;
         this.duration = duration;

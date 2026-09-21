@@ -18,8 +18,11 @@ app.registerExtension({
             id: `Doug.ElevatorMusic.${id}`, name, type, defaultValue,
             category: ["Elevator Music", "Playback", name], ...extra,
         });
-        setting("Enabled", "Play elevator music while running", "boolean", true, {
+        setting("Enabled", "Enable waitingMusak sounds", "boolean", true, {
             onChange: value => { if (!value) audio.mute(); else if (session.active && !preview.active) audio.start(); },
+        });
+        setting("Music", "Play background music while running", "boolean", true, {
+            onChange: value => { if (!value) audio.stop(); else if (session.active && !preview.active) audio.start(); },
         });
         setting("Volume", "Elevator music volume", "slider", 25, {
             attrs: { min: 0, max: 100, step: 1 }, onChange: () => { audio.updateVolume(); preview.audio.updateVolume(); },

@@ -37,13 +37,16 @@ For ComfyUI Desktop, use the `custom_nodes` folder inside your configured ComfyU
 
 Open **Settings → Elevator Music**, or search settings for **Elevator**.
 
-- **Play elevator music while running** — on/off, enabled by default.
+- **Enable waitingMusak sounds** — master on/off for automatic run sounds, enabled by default.
+- **Play background music while running** — turn off for silent waiting while keeping the completion ding.
 - **Elevator music style** — choose a style; switches during playback with a short fade.
 - **Elevator music volume** — 0–100, default 25.
 - **Ding when the run completes** — toggle the completion bell.
 - **Preview selected music (12 seconds)** — click **Preview selected music** to audition your choice without running a workflow; click **Stop preview** to end early. Changing styles during a preview auditions the new selection. Works even with automatic run music disabled. Preview temporarily pauses any run soundtrack and restores it afterward if the run is still active. Starting a workflow stops the preview.
 
 ComfyUI saves your preferences. No workflow edits are needed.
+
+**Ding only:** leave **Enable waitingMusak sounds** and **Ding when the run completes** on, and turn **Play background music while running** off. The preview button still lets you audition music. Existing installations keep their previous master sound preference.
 
 ## How it behaves
 

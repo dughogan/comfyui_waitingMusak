@@ -159,7 +159,7 @@ export class ElevatorAudio {
         if (resume) this.start();
     }
     playLoop() {
-        if (!this.wanted || this.source || !this.settings("Enabled", true) || this.context.state !== "running") return;
+        if (!this.wanted || this.source || !this.settings("Enabled", true) || !this.settings("Music", true) || this.context.state !== "running") return;
         if (!this.buffer) {
             const data = compose(22050, this.style ?? this.settings("Style", MUSIC_STYLES[0]));
             this.buffer = this.context.createBuffer(1, data.length, 22050);
