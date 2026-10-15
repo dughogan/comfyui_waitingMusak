@@ -1,0 +1,23 @@
+[project]
+name = "comfyui-waitingmusak"
+description = "Elevator music while your ComfyUI workflow runs, a ding when it finishes, and Comfy Monitor: a phone-friendly page to watch, stop and preview your renders from anywhere on your network or Tailscale."
+version = "1.10.0"
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Doug Hogan" }]
+keywords = ["comfyui", "music", "notification", "monitor", "remote", "progress", "tailscale"]
+
+# Nothing to install: the music is synthesized in the browser and the monitor uses
+# aiohttp, which ComfyUI already ships.
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/dughogan/comfyui_waitingMusak"
+Issues = "https://github.com/dughogan/comfyui_waitingMusak/issues"
+
+[tool.comfy]
+PublisherId = "dughogan"
+DisplayName = "waitingMusak + Comfy Monitor"
+Icon = ""
+includes = ["monitor"]

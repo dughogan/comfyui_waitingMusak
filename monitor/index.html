@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#211927">
+<title>Comfy Monitor</title>
+<!-- Official Comfy Icon (comfy.org/brand), used unmodified on Comfy Ink. -->
+<link rel="icon" type="image/svg+xml" href="comfy-icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Comfy Monitor">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap">
+<style>
+  /* Comfy brand (comfy.org/brand): Ink, Yellow, Canvas, Plum, Mauve, Warm White.
+     Type is PP Formula where installed, otherwise Inter, which comfy.org also uses. */
+  :root {
+    --ink: #211927; --yellow: #F2FF59; --canvas: #C2BFB9; --plum: #49378B; --mauve: #4D3762;
+    --warm-white: #F0EFED; --warm-gray: #7E7C78;
+    --bg: var(--ink); --panel: #2A2131; --panel-2: #33293C; --line: #3F3249;
+    --text: var(--warm-white); --muted: var(--canvas); --accent: var(--yellow);
+    --ok: var(--yellow); --bad: #FF8A7A; --warn: var(--canvas);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.5 "PP Formula", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--yellow); text-underline-offset: 3px; }
+  main { max-width: 720px; margin: 0 auto; padding: calc(18px + env(safe-area-inset-top)) 16px calc(32px + env(safe-area-inset-bottom)); }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .logo { width: 34px; height: 34px; flex: none; display: block; }
+  h1 { font-size: clamp(21px, 6.4vw, 26px); font-weight: 300; letter-spacing: -0.03em; color: var(--canvas); margin: 0; flex: 1; min-width: 0; line-height: 1.1; white-space: nowrap; }
+  h1 small { white-space: normal; }
+  h1 small { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; letter-spacing: 0; color: var(--muted); margin-top: 3px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); flex: none; }
+  .dot.live { background: var(--yellow); box-shadow: 0 0 0 3px rgb(242 255 89 / .18); }
+  /* Brand buttons: uppercase 800 with 0.7px tracking; yellow pill for primary, outline for the rest. */
+  button, .btn {
+    font: 800 12px/1 "PP Formula", Inter, system-ui, sans-serif; letter-spacing: .7px; text-transform: uppercase;
+    color: var(--text); background: transparent; border: 1.5px solid var(--line); border-radius: 999px;
+    padding: 9px 14px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+  }
+  button:hover, .btn:hover { border-color: var(--canvas); }
+  button.on, .btn.primary, button.primary { background: var(--yellow); border-color: var(--yellow); color: var(--ink); }
+  button:disabled { opacity: .5; cursor: default; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; margin-bottom: 14px; }
+  h2 { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .7px; color: var(--yellow); margin: 0 0 12px; }
+  .name { font-size: 22px; font-weight: 300; letter-spacing: -0.02em; overflow-wrap: anywhere; line-height: 1.25; }
+  .sub { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+  .bar { height: 8px; background: var(--ink); border-radius: 99px; overflow: hidden; margin: 10px 0 5px; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--yellow); border-radius: 99px; transition: width .25s; }
+  .bar.nodes > i { background: var(--canvas); }
+  .row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .idle { color: var(--muted); }
+  .thumbs { display: flex; gap: 8px; overflow-x: auto; margin-top: 14px; }
+  .thumbs a { flex: none; }
+  .thumbs img, .thumbs video { height: 96px; max-width: 170px; border-radius: 10px; display: block; background: #000; object-fit: cover; }
+  .thumbs .file { height: 96px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; font-size: 12px; color: var(--muted); display: flex; align-items: end; max-width: 150px; overflow-wrap: anywhere; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { padding: 12px 0; border-top: 1px solid var(--line); }
+  li:first-child { border-top: 0; padding-top: 0; }
+  .item { display: flex; align-items: baseline; gap: 10px; }
+  .item .grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .badge { font-size: 11px; font-weight: 800; letter-spacing: .7px; text-transform: uppercase; flex: none; }
+  .success { color: var(--ok); } .error { color: var(--bad); } .interrupted { color: var(--warn); }
+  .when { font-size: 12px; color: var(--muted); flex: none; font-variant-numeric: tabular-nums; }
+  .err { font-size: 12px; color: var(--bad); margin-top: 4px; }
+  .thumbs.small img, .thumbs.small video, .thumbs.small .file { height: 56px; }
+  .note { font-size: 12px; color: var(--muted); text-align: center; line-height: 1.8; }
+  .note a { color: var(--muted); }
+  button.danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 60%, var(--line)); }
+  button.x { padding: 6px 10px; flex: none; }
+  .actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .chips button[aria-pressed="true"] { background: var(--yellow); border-color: var(--yellow); color: var(--ink); }
+  .field { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); margin: 10px 0; }
+  .field select, .field input { flex: 1; min-width: 0; }
+  select { font: inherit; font-size: 14px; color: var(--text); background: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  input[type=range] { accent-color: var(--yellow); }
+  .item button.x { align-self: center; }
+  #soundPanel.off .chips, #soundPanel.off .field { opacity: .45; }
+  .thumbs a { position: relative; cursor: zoom-in; text-decoration: none; }
+  .thumbs .tile { height: 96px; width: 96px; border: 1px solid var(--line); border-radius: 10px; display: grid;
+    place-items: center; align-content: center; gap: 4px; font-size: 22px; color: var(--yellow); background: var(--ink); }
+  .thumbs .tile small { font-size: 10px; color: var(--muted); max-width: 86px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .thumbs.small .tile { height: 56px; width: 56px; font-size: 16px; }
+  .thumbs.small .tile small { display: none; }
+  .thumbs .play { position: absolute; inset: auto 6px 6px auto; font-size: 11px; background: rgb(33 25 39 / .8); color: var(--yellow); border-radius: 99px; padding: 1px 6px; }
+
+  /* Remote access */
+  #remote summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+  #remote summary::-webkit-details-marker { display: none; }
+  #remote summary h2 { margin: 0; flex: 1; }
+  #remote summary::after { content: "+"; color: var(--yellow); font-size: 20px; font-weight: 300; line-height: 1; }
+  #remote details[open] summary::after { content: "\2013"; }
+  #remote details[open] summary { margin-bottom: 14px; }
+  .pill { font-size: 11px; font-weight: 800; letter-spacing: .7px; text-transform: uppercase; padding: 3px 8px; border-radius: 99px; background: var(--panel-2); color: var(--muted); }
+  .pill.on { background: var(--yellow); color: var(--ink); }
+  .addr { display: grid; gap: 2px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .addr:first-child { border-top: 0; padding-top: 0; }
+  .addr > b { font-size: 11px; font-weight: 800; letter-spacing: .7px; text-transform: uppercase; color: var(--canvas); }
+  .addr a { font-size: 15px; overflow-wrap: anywhere; }
+  .addr .sub { margin-top: 2px; }
+  .steps { margin: 8px 0 0; padding-left: 20px; color: var(--muted); font-size: 13px; list-style: decimal; }
+  .steps li { border: 0; padding: 3px 0; }
+  .tsMsg { margin-top: 12px; font-size: 13px; padding: 10px 12px; border-radius: 12px; background: var(--panel-2); overflow-wrap: anywhere; }
+  .tsMsg:empty { display: none; }
+  .tsMsg.bad { color: var(--bad); }
+
+  #viewer { position: fixed; inset: 0; z-index: 10; background: #160F1B; display: flex; flex-direction: column; }
+  #viewer[hidden] { display: none; }
+  .vBar { display: flex; align-items: center; gap: 10px; padding: calc(10px + env(safe-area-inset-top)) 12px 10px 16px; }
+  #vTitle { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+  #vCount { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .vBtn { display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border-radius: 50%; font-size: 16px;
+    color: var(--text); background: var(--panel); border: 1px solid var(--line); text-decoration: none; letter-spacing: 0; }
+  #vStage { flex: 1; min-height: 0; position: relative; overflow: hidden; display: grid; place-items: center; touch-action: none; }
+  .vImage { max-width: 100%; max-height: 100%; object-fit: contain; transform-origin: center; user-select: none; -webkit-user-select: none; }
+  .vMedia { max-width: 100%; max-height: 100%; }
+  audio.vMedia { width: min(560px, 92%); }
+  .v3d { position: absolute; inset: 0; }
+  .v3d canvas { width: 100% !important; height: 100% !important; display: block; }
+  .vMsg { color: var(--muted); text-align: center; padding: 24px; max-width: 420px; }
+  .vNav { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 58px; padding: 0; border-radius: 14px; justify-content: center;
+    font-size: 26px; font-weight: 300; background: rgb(33 25 39 / .8); z-index: 2; letter-spacing: 0; }
+  #vPrev { left: 8px; } #vNext { right: 8px; }
+  #vHint { text-align: center; font-size: 12px; color: var(--muted); padding: 8px 16px calc(12px + env(safe-area-inset-bottom)); min-height: 34px; }
+</style>
+
+</head>
+<body>
+<main>
+  <header>
+    <img class="logo" src="comfy-icon.svg" alt="">
+    <h1>Comfy Monitor <small><span class="dot" id="dot" title="Connection"></span><span id="host"></span></small></h1>
+    <button id="sound" type="button">Sound off</button>
+  </header>
+
+  <section id="now">
+    <h2>Now running</h2>
+    <div id="nowBody" class="idle">Connecting…</div>
+  </section>
+
+  <section id="queue" hidden>
+    <h2 id="queueTitle">Queued</h2>
+    <ul id="queueList"></ul>
+  </section>
+
+  <section id="soundPanel">
+    <h2>Sound on this device</h2>
+    <div class="chips">
+      <button id="music" type="button" aria-pressed="false">Music</button>
+      <button id="ding" type="button" aria-pressed="false">Ding</button>
+      <button id="preview" type="button">Preview</button>
+    </div>
+    <label class="field">Style
+      <select id="style"></select>
+    </label>
+    <label class="field">Volume
+      <input id="volume" type="range" min="0" max="100" step="1">
+    </label>
+    <p class="sub" id="soundHint"></p>
+  </section>
+
+  <section>
+    <h2>Recent</h2>
+    <ul id="history"><li class="idle">No finished jobs since ComfyUI started.</li></ul>
+  </section>
+
+  <section id="remote">
+    <details id="remoteDetails">
+      <summary><h2>Remote access</h2><span class="pill" id="tsPill">Home network</span></summary>
+      <div id="tsBody"></div>
+      <div class="tsMsg" id="tsMsg" role="status"></div>
+    </details>
+  </section>
+
+  <p class="note" id="footer">waitingMusak</p>
+</main>
+<div id="viewer" hidden role="dialog" aria-modal="true" aria-labelledby="vTitle">
+  <div class="vBar">
+    <span id="vTitle"></span>
+    <span id="vCount"></span>
+    <a id="vOpen" class="vBtn" href="#" aria-label="Download">⬇</a>
+    <button id="vClose" class="vBtn" type="button" aria-label="Close">✕</button>
+  </div>
+  <div id="vStage"></div>
+  <button id="vPrev" class="vNav" type="button" aria-label="Previous">‹</button>
+  <button id="vNext" class="vNav" type="button" aria-label="Next">›</button>
+  <div id="vHint"></div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+  "@mkkellogg/gaussian-splats-3d": "https://cdn.jsdelivr.net/npm/@mkkellogg/gaussian-splats-3d@0.4.7/build/gaussian-splats-3d.module.js"
+} }
+</script>
+<script type="module" src="monitor.js"></script>
+</body>
+</html>
